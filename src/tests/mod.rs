@@ -290,6 +290,24 @@ fn rdiv_by_layout() -> Result<()> {
 }
 
 #[test]
+fn rdiv_layout_by_layout() -> Result<()> {
+    test_fixed_point! {
+        case (a | Layout, b | Layout, expected_floor | Layout, expected_ceil | Layout) => {
+            assert_eq!(a.rdiv(b, Floor)?, expected_floor);
+            assert_eq!(a.rdiv(b, Ceil)?, expected_ceil);
+            // Both arguments' negation doesn't change the result
+            assert_eq!((-a).rdiv(-b, Floor)?, expected_floor);
+            assert_eq!((-a).rdiv(-b, Ceil)?, expected_ceil);
+        },
+        all {
+            (5, 2, 2, 3);
+            (-5, 2, -3, -2);
+        },
+    };
+    Ok(())
+}
+
+#[test]
 fn rdiv_round() -> Result<()> {
     test_fixed_point! {
         case (
@@ -773,4 +791,6 @@ fn const_fn() {
     test_cases.compile_fail(
         "src/tests/const_fn/01_fixnum_const_bad_str_with_too_long_fractional_part.rs",
     );
+    test_cases
+        .compile_fail("src/tests/const_fn/02_fixnum_const_bad_str_with_too_long_integer_part.rs");
 }

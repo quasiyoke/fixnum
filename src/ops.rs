@@ -412,15 +412,3 @@ macro_rules! impl_for_ints {
 }
 
 impl_for_ints!(i8, i16, i32, i64, i128); // TODO: unsigned?
-
-#[test]
-fn it_rounds_rdiv() {
-    assert_eq!(5.rdiv(2, RoundMode::Floor), Ok(2));
-    assert_eq!(5.rdiv(2, RoundMode::Ceil), Ok(3));
-    assert_eq!((-5).rdiv(2, RoundMode::Floor), Ok(-3));
-    assert_eq!((-5).rdiv(2, RoundMode::Ceil), Ok(-2));
-    assert_eq!(5.rdiv(-2, RoundMode::Floor), Ok(-3));
-    assert_eq!(5.rdiv(-2, RoundMode::Ceil), Ok(-2));
-    assert_eq!((-5).rdiv(-2, RoundMode::Floor), Ok(2));
-    assert_eq!((-5).rdiv(-2, RoundMode::Ceil), Ok(3));
-}

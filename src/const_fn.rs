@@ -96,6 +96,11 @@ pub const fn parse_fixed(str: &str, coef: Int) -> Int {
         Some(point) => point,
         None => {
             let integral = parse_int(bytes, start, bytes.len());
+            if signum == 1 {
+                const_assert!(integral <= Int::MAX / coef);
+            } else {
+                const_assert!(integral <= -(Int::MIN / coef));
+            }
             return signum * integral * coef;
         }
     };
@@ -107,8 +112,24 @@ pub const fn parse_fixed(str: &str, coef: Int) -> Int {
     let fractional = parse_int(bytes, point + 1, bytes.len());
     let final_integral = integral * coef;
     let final_fractional = coef / exp * fractional;
+    let max_integral: Int = Int::MAX / coef;
+    let min_integral: Int = -(Int::MIN / coef);
+    let min_fractional: Int = -(Int::MIN % coef);
+    if signum == 1 {
+        const_assert!(
+            integral < max_integral || (integral == max_integral && fractional <= Int::MAX % coef)
+        );
+    } else {
+        const_assert!(
+            integral < min_integral || (integral == min_integral && fractional <= min_fractional)
+        );
+    }
 
-    signum * (final_integral + final_fractional)
+    if signum == -1 && integral == min_integral && fractional == min_fractional {
+        Int::MIN
+    } else {
+        signum * (final_integral + final_fractional)
+    }
 }
 
 #[test]
