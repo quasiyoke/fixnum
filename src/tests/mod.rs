@@ -785,8 +785,30 @@ fn saturating_sub() -> Result<()> {
     Ok(())
 }
 
+//#[test]
+//fn const_fn() -> Result<()> {
+//test_fixed_point! {
+//case (s | &str, coef | Layout, expected | Layout) => {
+//assert_eq!(crate::const_fn::parse_fixed(s, coef) as Layout, expected);
+//},
+//fp64 {
+//(fp!(9222222222), fp!(-9222222222), FixedPoint::MAX);
+//(fp!(4611686019), fp!(-4611686018.27387903), FixedPoint::MAX);
+//(fp!(-9222222222), fp!(9222222222), FixedPoint::MIN);
+//(fp!(-4611686019), fp!(4611686018.47387903), FixedPoint::MIN);
+//},
+//fp128 {
+//(fp!(85550005550005550005), fp!(-85550005550005550005), FixedPoint::MAX);
+//(fp!(85550005550005550005), fp!(-85550005550005550005.000000000427387903), FixedPoint::MAX);
+//(fp!(-85550005550005550005), fp!(85550005550005550005), FixedPoint::MIN);
+//(fp!(-85550005550005550005), fp!(85550005550005550005.000000000427387903), FixedPoint::MIN);
+//},
+//};
+//Ok(())
+//}
+
 #[test]
-fn const_fn() {
+fn const_fn_build_tests() {
     let test_cases = trybuild::TestCases::new();
     test_cases.compile_fail(
         "src/tests/const_fn/01_fixnum_const_bad_str_with_too_long_fractional_part.rs",

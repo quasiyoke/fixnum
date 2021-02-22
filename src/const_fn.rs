@@ -81,7 +81,8 @@ const fn parse_int(bytes: &[u8], start: usize, end: usize) -> Int {
     result
 }
 
-// TODO: check overflow explicitly.
+const fn assert_fixed_point_inner_matches_with_str()
+
 pub const fn parse_fixed(str: &str, coef: Int) -> Int {
     let bytes = str.as_bytes();
     let signum = if bytes[0] == b'-' { -1 } else { 1 };
@@ -112,8 +113,8 @@ pub const fn parse_fixed(str: &str, coef: Int) -> Int {
     let fractional = parse_int(bytes, point + 1, bytes.len());
     let final_integral = integral * coef;
     let final_fractional = coef / exp * fractional;
+    // We assume that `max_integral = min_integral = -(Int::MIN / coef)`
     let max_integral: Int = Int::MAX / coef;
-    let min_integral: Int = -(Int::MIN / coef);
     let min_fractional: Int = -(Int::MIN % coef);
     if signum == 1 {
         const_assert!(
@@ -121,20 +122,23 @@ pub const fn parse_fixed(str: &str, coef: Int) -> Int {
         );
     } else {
         const_assert!(
-            integral < min_integral || (integral == min_integral && fractional <= min_fractional)
+            integral < max_integral || (integral == max_integral && fractional <= min_fractional)
         );
     }
 
-    if signum == -1 && integral == min_integral && fractional == min_fractional {
+    let result = if integral == max_integral && fractional == min_fractional && signum == -1 {
         Int::MIN
     } else {
         signum * (final_integral + final_fractional)
-    }
+    };
+    assert_fixed_point_inner_matches_with_str(result, coef, str);
+
+    result
 }
 
 #[test]
 fn from_good_str() {
-    let c = 1_000_000_000;
+    let c: Int = 1_000_000_000;
     assert_eq!(parse_fixed("1", c), 1000000000);
     assert_eq!(parse_fixed("1.1", c), 1100000000);
     assert_eq!(parse_fixed("1.02", c), 1020000000);
@@ -142,6 +146,15 @@ fn from_good_str() {
     assert_eq!(parse_fixed("+1.02", c), 1020000000);
     assert_eq!(parse_fixed("123456789.123456789", c), 123456789123456789);
     assert_eq!(parse_fixed("9223372036.854775807", c), 9223372036854775807);
+    assert_eq!(parse_fixed("9223372036.854775806", c), 9223372036854775806);
+    assert_eq!(
+        parse_fixed("-9223372036.854775808", c),
+        -9223372036854775808
+    );
+    assert_eq!(
+        parse_fixed("-9223372036.854775807", c),
+        -9223372036854775807
+    );
     assert_eq!(parse_fixed("0.1234", c), 123400000);
     assert_eq!(parse_fixed("-0.1234", c), -123400000);
 }
