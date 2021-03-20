@@ -785,27 +785,38 @@ fn saturating_sub() -> Result<()> {
     Ok(())
 }
 
-//#[test]
-//fn const_fn() -> Result<()> {
-//test_fixed_point! {
-//case (s | &str, coef | Layout, expected | Layout) => {
-//assert_eq!(crate::const_fn::parse_fixed(s, coef) as Layout, expected);
-//},
-//fp64 {
-//(fp!(9222222222), fp!(-9222222222), FixedPoint::MAX);
-//(fp!(4611686019), fp!(-4611686018.27387903), FixedPoint::MAX);
-//(fp!(-9222222222), fp!(9222222222), FixedPoint::MIN);
-//(fp!(-4611686019), fp!(4611686018.47387903), FixedPoint::MIN);
-//},
-//fp128 {
-//(fp!(85550005550005550005), fp!(-85550005550005550005), FixedPoint::MAX);
-//(fp!(85550005550005550005), fp!(-85550005550005550005.000000000427387903), FixedPoint::MAX);
-//(fp!(-85550005550005550005), fp!(85550005550005550005), FixedPoint::MIN);
-//(fp!(-85550005550005550005), fp!(85550005550005550005.000000000427387903), FixedPoint::MIN);
-//},
-//};
-//Ok(())
-//}
+#[test]
+fn const_fn() -> Result<()> {
+    const BILLION: i128 = 1_000_000_000;
+    const TEN_POW_18: i128 = 1_000_000_000_000_000_000;
+    test_fixed_point! {
+        case (s | &str, coef | i128, expected | i128) => {
+            assert_eq!(i128::from(crate::const_fn::parse_fixed(s, coef as _)), expected);
+        },
+        all {
+            ("0", BILLION, 0);
+            ("1", BILLION, BILLION);
+            ("1.1", BILLION, 1100000000);
+            ("1.02", BILLION, 1020000000);
+            ("-1.02", BILLION, -1020000000);
+            ("+1.02", BILLION, 1020000000);
+            ("123456789.123456789", BILLION, 123456789123456789);
+            ("9223372036.854775807", BILLION, 9223372036854775807);
+            ("9223372036.854775806", BILLION, 9223372036854775806);
+            ("9223372036.854775805", BILLION, 9223372036854775805);
+            ("-9223372036.854775808", BILLION, -9223372036854775808);
+            ("-9223372036.854775807", BILLION, -9223372036854775807);
+            ("-9223372036.854775806", BILLION, -9223372036854775806);
+            ("0.1234", BILLION, 123400000);
+            ("-0.1234", BILLION, -123400000);
+        },
+        fp128 {
+            ("1", TEN_POW_18, TEN_POW_18);
+            ("-170141183460469231731.687303715884105728", TEN_POW_18, -170141183460469231731687303715884105728);
+        },
+    };
+    Ok(())
+}
 
 #[test]
 fn const_fn_build_tests() {
